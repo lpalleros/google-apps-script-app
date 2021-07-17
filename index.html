@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <?!= require('Head')?>
+  <?!= require('main.css')?>
+</head>      
+<body>     
+<!--**************************************************************************--> 
+
+  <div id="root"></div>
+
+<!--***************************************************************************--> 
+
+<?!= require('Navbar')?>
+<?!= require('Scorecard')?>
+<?!= require('Table')?>
+<?!= require('BasicForm')?>
+<?!= require('BasicFormSecond')?>
+<?!= require('Sidenav')?>
+
+
+<script>
+  // document.querySelector('#warning').innerText = '';
+
+   console.log (  ReactRouterDOM );
+
+</script>
+<script type="text/babel">
+  const { useState, useEffect } = React;
+  const { BrowserRouter, Route, Switch, Link } = ReactRouterDOM;
+
+  const Main = () => {
+    const [responses,setResponse] = useState([{name:'loading...',message:'loading...'}]);
+    const [nextForm,setNextForm] = useState(true);
+
+    const addResponse = (res) => {
+      setResponse((state) => ([...state,res]));
+    }
+
+    const handleClick = () => {
+      setNextForm(!nextForm);
+    }
+
+    useEffect(() => {
+      const success = (data) => {
+        setResponse((state) => ([...data]));
+      };
+      google.script.run.withSuccessHandler(success).getObjects();
+    },[]);
+
+    return (
+      <div>
+        <Sidenav/>
+        <Navbar/>
+        <div className="container">
+          <div className="row" id='main'>
+            <div className="col s12 m4" id='scorecard'>
+              <Scorecard responses={responses}/>
+            </div>
+            <div className="col s12 m8" id="forms">
+                { 
+                  nextForm ? 
+                  <BasicForm addUser={addResponse} handleClick={handleClick}/> : 
+                  <BasicFormSecond addUser={addResponse} handleClick={handleClick}/>
+                }
+            </div>
+          </div>
+        </div>
+        <Table responses={responses}/>
+      </div>
+    )
+  };
+  
+const App = () => {
+      return(
+        <BrowserRouter>
+        <li><Link to="/">Home</Link></li>
+          <Switch>
+            <Route exact path="/" component={Main} />
+          </Switch>
+          
+        </BrowserRouter>
+      )
+    }
+  ReactDOM.render(
+    <App/>, 
+    document.getElementById('root') 
+  );
+ </script>
+</body>
+</html>
